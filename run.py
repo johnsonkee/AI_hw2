@@ -40,12 +40,13 @@ def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
                         same += 1
                 return same
             # train_acc += compute_acc(y_hat, y)
+            print("trains")
         time_s = "time %.2f sec" % (time.time() - start)
         epoch_s = ("epoch %d, loss %f,  "
                    % (epoch+1,
                       train_loss/len(train_dataloader)))
         print(epoch_s + time_s + ', lr' + str(trainer.learning_rate))
-def evaluate():
+def evaluate(net, test_dataloaders):
     pass
 
 
@@ -72,4 +73,7 @@ if __name__ == "__main__":
 
     net = resnet18(num_classes=10)
     net.initialize(ctx=ctx, init=init.Xavier())
+    print("====>train")
     train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR)
+    print("====>evaluate")
+    evaluate(net, test_dataloader)
