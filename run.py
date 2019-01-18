@@ -17,7 +17,7 @@ NUMS_EPOCHS = 5
 LR = 0.1
 USE_CUDA = True
 
-def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
+def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx):
     trainer = Trainer(net.collect_params(), 'adam',
                       {'learning_rate': lr})
     myloss = loss.SoftmaxCrossEntropyLoss()
