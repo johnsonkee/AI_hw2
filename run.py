@@ -14,7 +14,7 @@ import gluonbook as gb
 BATCH_SIZE = 128
 NUMS_EPOCHS = 10
 LR = 0.1
-USE_CUDA = True 
+USE_CUDA = True
 
 def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
     trainer = Trainer(net.collect_params(), 'adam',
@@ -46,9 +46,9 @@ def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
                    % (epoch+1,
                       train_loss/len(train_dataloader)))
         print(epoch_s + time_s + ', lr' + str(trainer.learning_rate))
-def evaluate(net, test_dataloaders):
-    pass
 
+def evaluate(net, test_dataloaders,ctx):
+    print(gb.evaluate_accuracy(test_dataloader,net,ctx))
 
 
 if __name__ == "__main__":
@@ -74,6 +74,6 @@ if __name__ == "__main__":
     net = resnet18(num_classes=10)
     net.initialize(ctx=ctx, init=init.Xavier())
     print("====>train")
-    train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
+    # train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
     print("====>evaluate")
-    evaluate(net, test_dataloader)
+    evaluate(net, test_dataloader, ctx)
