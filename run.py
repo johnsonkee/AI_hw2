@@ -7,12 +7,13 @@ from myNet import resnet18
 from mxnet import autograd
 from mxnet.gluon import loss
 from mxnet import init
-import mxnet as mx
+from mxnet import cpu
+from mxnet import gpu
 import time
 import gluonbook as gb
 
 BATCH_SIZE = 128
-NUMS_EPOCHS = 10
+NUMS_EPOCHS = 5
 LR = 0.1
 USE_CUDA = True
 
@@ -33,29 +34,23 @@ def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
             l.backward()
             trainer.step(batch_size)
             train_loss += l.mean().asscalar()
-            def compute_acc(y,y_hat):
-                length = len(y)
-                same = 0
-                for i in range(length):
-                    if y[i] == y_hat[i]:
-                        same += 1
-                return same
-            # train_acc += compute_acc(y_hat, y)
+        train_acc = gb.evaluate_accuracy(train_dataloader,net,ctx)
         time_s = "time %.2f sec" % (time.time() - start)
-        epoch_s = ("epoch %d, loss %f,  "
+        epoch_s = ("epoch %d, loss %f, train_acc %f "
                    % (epoch+1,
-                      train_loss/len(train_dataloader)))
+                      train_loss/len(train_dataloader),
+                      train_acc))
         print(epoch_s + time_s + ', lr' + str(trainer.learning_rate))
 
-def evaluate(net, test_dataloaders,ctx):
-    print(gb.evaluate_accuracy(test_dataloader,net,ctx))
+def evaluate(net, test_dataloaders, ctx):
+    print(gb.evaluate_accuracy(test_dataloader, net, ctx))
 
 
 if __name__ == "__main__":
     if USE_CUDA:
-        ctx = mx.gpu()
+        ctx = gpu()
     else:
-        ctx = mx.cpu()
+        ctx = cpu()
     transform_format = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize([0.4914, 0.4822, 0.4465],
@@ -74,6 +69,6 @@ if __name__ == "__main__":
     net = resnet18(num_classes=10)
     net.initialize(ctx=ctx, init=init.Xavier())
     print("====>train")
-    # train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
+    train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
     print("====>evaluate")
     evaluate(net, test_dataloader, ctx)
