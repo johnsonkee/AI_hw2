@@ -1,7 +1,9 @@
 from mxnet import ndarray as nd
 from mxnet.gluon import HybridBlock
 from mxnet.gluon import nn
-
+"""
+Build a resnet whose depth is 18.
+"""
 
 class Residual(HybridBlock):
     def __init__(self,num_channels, use_1x1conv=False, strides=1, **kwargs):

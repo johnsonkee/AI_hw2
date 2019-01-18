@@ -12,6 +12,8 @@ from mxnet import gpu
 import time
 import gluonbook as gb
 
+from argparse import ArgumentParser
+
 BATCH_SIZE = 128
 NUMS_EPOCHS = 2
 LR = 0.1
@@ -22,6 +24,38 @@ LR_DECAY = 0.1
 MODEL_PATH = 'resnet10.params'
 USE_MODEL = False
 SAVE_MODEL = True
+
+
+def parse_args():
+    parser = ArgumentParser(description="Train a resnet18 for"
+                                        " cifar10 dataset")
+    parser.add_argument('--data', type=str, default='./dataset/cifar10',
+                        help='path to test and training data files')
+    parser.add_argument('-e', '--epochs', type=int, default=20,
+                        help='number of epochs for training')
+    parser.add_argument('-b', '--batch_size', type=int, default=128,
+                        help='number of examples for each iteration')
+    parser.add_argument('-lr', '--learning_rate', type=float, default=0.1,
+                        help='learning rate for optimizer')
+    parser.add_argument('-lp', '--learning_period', type=float, default=80,
+                        help='after learning_period, lr = lr * lr_decay')
+    parser.add_argument('-lc','--learning_decay',type=float, default=0.1,
+                        help='after learning_period, lr = lr * lr_decay')
+    parser.add_argument('-wd',type=float, default=5e-4,
+                        help='weight decay, used in SGD optimization')
+    parser.add_argument('--gpu', type=bool, default=False,
+                        help='use available GPUs')
+    parser.add_argument('--use_model_path', type=str, default='resnet18.params',
+                        help='the path of the pre-trained model')
+    parser.add_argument('--use_model', type=bool, default=False,
+                        help='whether use a pre-trained model')
+    parser.add_argument('--save_model_path', type=str, default='resnet18.params',
+                        help='where to save the trained model')
+    parser.add_argument('--save_model', type=bool, default=False,
+                        help='whether save the model')
+
+    return parser.parse_args()
+
 
 def train(net,
           train_dataloader,
@@ -51,9 +85,9 @@ def train(net,
             l.backward()
             trainer.step(batch_size)
             train_loss += l.mean().asscalar()
-        train_acc = gb.evaluate_accuracy(train_dataloader,net,ctx)
+        train_acc = evaluate(net,train_dataloader,ctx)
         time_s = "time %.2f sec" % (time.time() - start)
-        test_acc = gb.evaluate_accuracy(test_dataloader,net,ctx) 
+        test_acc = evaluate(net,test_dataloader,ctx)
         epoch_s = ("epoch %d, loss %f, train_acc %f, test_acc %f"
                    % (epoch+1,
                       train_loss/len(train_dataloader),
@@ -62,9 +96,22 @@ def train(net,
         print(epoch_s + time_s + ', lr' + str(trainer.learning_rate))
 
 def evaluate(net, test_dataloader, ctx):
-    print(gb.evaluate_accuracy(test_dataloader, net, ctx))
+    return gb.evaluate_accuracy(test_dataloader, net, ctx)
 
 def main():
+    args = parse_args()
+
+    BATCH_SIZE = args.batch_size
+    NUMS_EPOCHS = args.epochs
+    LR = args.learning_rate
+    USE_CUDA = args.gpu
+    WD = args.wd
+    LR_PERIOD = args.learning_period
+    LR_DECAY = args.learning_decay
+    MODEL_PATH = args.use_model_path
+    USE_MODEL = args.use_model
+    SAVE_MODEL = args.save_model
+
     if USE_CUDA:
         ctx = gpu()
     else:
@@ -97,7 +144,7 @@ def main():
     net.hybridize()
 
     if USE_MODEL:
-        net.load_parameters(MODEL_PATH)
+        net.load_parameters(MODEL_PATH,ctx=ctx)
     else:
         net.initialize(ctx=ctx, init=init.Xavier())
 

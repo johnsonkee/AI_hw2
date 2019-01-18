@@ -1,7 +1,6 @@
 import mxnet as mx
+from argparse import ArgumentParser
 
 net = mx.gluon.nn.Dense(10)
 net.initialize()
-a = mx.ndarray.ones((1,10))
-print(a.dtype)
-print(net(a))
+a = mx.ndarray.ones((1, 10))
