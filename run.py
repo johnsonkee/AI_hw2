@@ -1,3 +1,4 @@
+# coding=utf-8
 from mydataset import _train_data, _test_data
 from mxnet.gluon.data import DataLoader
 from mxnet.gluon.data.vision import transforms
@@ -13,7 +14,7 @@ import gluonbook as gb
 BATCH_SIZE = 128
 NUMS_EPOCHS = 10
 LR = 0.1
-USE_CUDA = False
+USE_CUDA = True 
 
 def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
     trainer = Trainer(net.collect_params(), 'adam',
@@ -40,7 +41,6 @@ def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx=mx.cpu()):
                         same += 1
                 return same
             # train_acc += compute_acc(y_hat, y)
-            print("trains")
         time_s = "time %.2f sec" % (time.time() - start)
         epoch_s = ("epoch %d, loss %f,  "
                    % (epoch+1,
@@ -74,6 +74,6 @@ if __name__ == "__main__":
     net = resnet18(num_classes=10)
     net.initialize(ctx=ctx, init=init.Xavier())
     print("====>train")
-    train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR)
+    train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
     print("====>evaluate")
     evaluate(net, test_dataloader)
