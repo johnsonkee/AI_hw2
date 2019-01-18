@@ -13,11 +13,11 @@ import time
 import gluonbook as gb
 
 BATCH_SIZE = 128
-NUMS_EPOCHS = 5
+NUMS_EPOCHS = 50
 LR = 0.1
 USE_CUDA = True
 
-def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx):
+def train(net, train_dataloader, test_dataloader,  batch_size, nums_epochs, lr, ctx):
     trainer = Trainer(net.collect_params(), 'adam',
                       {'learning_rate': lr})
     myloss = loss.SoftmaxCrossEntropyLoss()
@@ -36,10 +36,12 @@ def train(net, train_dataloader, batch_size, nums_epochs, lr, ctx):
             train_loss += l.mean().asscalar()
         train_acc = gb.evaluate_accuracy(train_dataloader,net,ctx)
         time_s = "time %.2f sec" % (time.time() - start)
-        epoch_s = ("epoch %d, loss %f, train_acc %f "
+        test_acc = gb.evaluate_accuracy(test_dataloader,net,ctx) 
+        epoch_s = ("epoch %d, loss %f, train_acc %f, test_acc %f"
                    % (epoch+1,
                       train_loss/len(train_dataloader),
-                      train_acc))
+                      train_acc,
+                      test_acc))
         print(epoch_s + time_s + ', lr' + str(trainer.learning_rate))
 
 def evaluate(net, test_dataloaders, ctx):
@@ -69,6 +71,6 @@ if __name__ == "__main__":
     net = resnet18(num_classes=10)
     net.initialize(ctx=ctx, init=init.Xavier())
     print("====>train")
-    train(net, train_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
+    train(net, train_dataloader, test_dataloader, BATCH_SIZE, NUMS_EPOCHS, LR,ctx)
     print("====>evaluate")
     evaluate(net, test_dataloader, ctx)
