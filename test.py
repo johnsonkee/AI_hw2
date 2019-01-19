@@ -28,8 +28,8 @@ test_dataloader = DataLoader(_test_data.transform_first(transform_test),
                              last_batch='keep')
 
 net = resnet18(10)
-# net.load_parameters(MODEL_PATH,ctx=CTX)
-net.initialize(ctx=CTX)
+net.load_parameters(MODEL_PATH,ctx=CTX)
+# net.initialize(ctx=CTX)
 
 confusion_matrix = nd.zeros((10,10))
 
