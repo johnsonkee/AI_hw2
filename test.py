@@ -43,8 +43,8 @@ for data,label in test_dataloader:
 
 confusion_matrix = confusion_matrix.asnumpy()
 
-data = pd.DataFrame(confusion_matrix)
-data.to_csv("confusion.csv",index=False, columns=False)
+data = pd.DataFrame(confusion_matrix,dtype='int8')
+data.to_csv("confusion.csv",index=False, header=False)
 
 
 
