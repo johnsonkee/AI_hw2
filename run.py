@@ -14,16 +14,6 @@ import gluonbook as gb
 
 from argparse import ArgumentParser
 
-BATCH_SIZE = 128
-NUMS_EPOCHS = 2
-LR = 0.1
-USE_CUDA = True
-WD = 5e-4
-LR_PERIOD = 80
-LR_DECAY = 0.1
-MODEL_PATH = 'resnet10.params'
-USE_MODEL = False
-SAVE_MODEL = True
 
 
 def parse_args():
@@ -51,7 +41,7 @@ def parse_args():
                         help='whether use a pre-trained model')
     parser.add_argument('--save_model_path', type=str, default='resnet18.params',
                         help='where to save the trained model')
-    parser.add_argument('--save_model', type=bool, default=False,
+    parser.add_argument('--save_model', type=bool, default=True,
                         help='whether save the model')
 
     return parser.parse_args()
@@ -88,7 +78,7 @@ def train(net,
         train_acc = evaluate(net,train_dataloader,ctx)
         time_s = "time %.2f sec" % (time.time() - start)
         test_acc = evaluate(net,test_dataloader,ctx)
-        epoch_s = ("epoch %d, loss %f, train_acc %f, test_acc %f"
+        epoch_s = ("epoch %d, loss %f, train_acc %f, test_acc %f, "
                    % (epoch+1,
                       train_loss/len(train_dataloader),
                       train_acc,
