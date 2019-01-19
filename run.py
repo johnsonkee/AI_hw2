@@ -137,7 +137,6 @@ def main():
         net.load_parameters(MODEL_PATH,ctx=ctx)
     else:
         net.initialize(ctx=ctx, init=init.Xavier())
-
     print("====>train and test")
     train(net, train_dataloader, test_dataloader,
           BATCH_SIZE, NUMS_EPOCHS, LR, ctx, WD,LR_PERIOD, LR_DECAY)

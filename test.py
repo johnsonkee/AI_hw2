@@ -3,10 +3,11 @@ from mxnet.gluon.data.vision import transforms
 from mxnet.gluon.data import DataLoader
 from myNet import resnet18
 from mxnet import cpu, gpu
-import gluonbook as gb
+from mxnet import ndarray as nd
+import pandas as pd
 
 
-BATCH_SIZE = 128
+BATCH_SIZE = 1
 MODEL_PATH = 'resnet18.params'
 CTX = gpu()
 
@@ -24,6 +25,19 @@ test_dataloader = DataLoader(_test_data.transform_first(transform_test),
 net = resnet18(10)
 net.load_parameters(MODEL_PATH,ctx=CTX)
 
-test_acc = gb.evaluate_accuracy(test_dataloader,net,ctx=CTX)
-print(test_acc)
+confusion_matrix = nd.zeros((10,10))
+
+for data,label in test_dataloader:
+    label_hat = net(data.as_in_context(CTX))
+    label_number = label.astype('int8')
+    hat_number = label_hat.argmax(axis=1).copyto(cpu())
+    confusion_matrix[label_number][hat_number] += 1
+
+confusion_matrix = confusion_matrix.asnumpy()
+
+data = pd.DataFrame(confusion_matrix)
+data.to_csv("confusion.csv",index=False, columns=False)
+
+
+
 
