@@ -28,15 +28,18 @@ test_dataloader = DataLoader(_test_data.transform_first(transform_test),
                              last_batch='keep')
 
 net = resnet18(10)
-net.load_parameters(MODEL_PATH,ctx=CTX)
+# net.load_parameters(MODEL_PATH,ctx=CTX)
+net.initialize(ctx=CTX)
 
 confusion_matrix = nd.zeros((10,10))
 
+print("====>make confusion matrix")
 for data,label in test_dataloader:
     label_hat = net(data.as_in_context(CTX))
-    label_number = label.astype('int8').copyto(cpu())
-    hat_number = label_hat.argmax(axis=1).copyto(cpu())
-    confusion_matrix[label_number][hat_number] += 1
+    label_number = label.astype('int8').copyto(cpu()).asscalar()
+    hat_number = label_hat.argmax(axis=1).astype('int8').copyto(cpu())
+    hat_number = hat_number.asscalar()
+    confusion_matrix[label_number-1][hat_number-1] += 1
 
 confusion_matrix = confusion_matrix.asnumpy()
 
